@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loddbok trekning</title>
+    <title>Loddboktrekning</title>
+    <meta name="description" property="og:description" content="Et verktøy som lar deg gjennomføre loddtrekning med en eller flere loddbøker av ulik størrelse samtidig. Ideelt for f.eks. basar, idrettslag og andre tilstelninger med loddtrekning.">
+    <meta name="keywords" content="Loddboktrekning, loddbok, lotteri, loddbøker, basar, offline loddtrekning">
+    <meta name="author" content="Anders Borud">
+    <meta name="robots" content="index, follow"> <meta property="og:type" content="website">
+    <meta property="og:url" content="https://andebor.github.io/loddtrekning/"> 
+    <meta property="og:title" content="Loddboktrekning">
     <style>
         body {
             font-family: sans-serif;
@@ -150,14 +156,14 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎯 Loddbok Trekning</h1>
+        <h1>🎯 Loddboktrekning</h1>
         <div id="errorMessage"></div>
 
         <div class="section">
             <h2>Definer Loddbøker</h2>
             <div id="rangeSetup">
                 <input type="text" id="rangeName" placeholder="Navn (f.eks. Blå bok)">
-                <input type="number" id="rangeMax" placeholder="Maks Verdi (1-1000)" min="1" max="1000">
+                <input type="number" id="rangeMax" placeholder="Maks Verdi (1-10000)" min="1" max="10000">
                 <button id="addRangeBtn">Legg til bok</button>
             </div>
             <div id="rangesDisplay">
