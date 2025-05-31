@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loddbok trekning</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        h1, h2, h3 {
+            color: #333;
+            text-align: center;
+        }
+        h3 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .section {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        #rangeSetup {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        #rangeSetup input[type="text"],
+        #rangeSetup input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+        #rangeSetup input[type="text"] {
+            width: 120px; 
+            flex-grow: 0; 
+        }
+         #rangeSetup input[type="number"] {
+            width: 150px; 
+            flex-grow: 0;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #rangesList {
+            list-style-type: none;
+            padding: 0;
+        }
+        #rangesList li {
+            background-color: #e9ecef;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #rangesList li button {
+            background-color: #dc3545;
+            font-size: 0.8em;
+            padding: 5px 8px;
+        }
+        #rangesList li button:hover {
+            background-color: #c82333;
+        }
+        #pickedCombinationResult {
+            font-size: 1.2em;
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #e6f7ff;
+            border: 1px solid #b3e0ff;
+            border-radius: 4px;
+        }
+        #pickedCombinationDisplay {
+            font-weight: bold;
+            color: #0056b3;
+        }
+        #statsDisplay p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        .lottery-controls {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 20px; /* Added margin for spacing */
+        }
+         #errorMessage {
+            color: red;
+            text-align: center;
+            min-height: 1.2em; /* Reserve space to prevent layout shifts */
+            margin-bottom: 10px;
+        }
+        #drawnCombinationsListContainer {
+            margin-top: 20px;
+        }
+        #drawnCombinationsList {
+            list-style-type: decimal; /* Numbered list */
+            padding-left: 20px; /* Indent list items */
+            max-height: 200px; /* Limit height and make scrollable */
+            overflow-y: auto; /* Add scrollbar if content overflows */
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        #drawnCombinationsList li {
+            padding: 3px 0;
+        }
+        #noDrawnItemsMsg {
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 VGIL Loddbok Trekning</h1>
+        <div id="errorMessage"></div>
+
+        <div class="section">
+            <h2>Definer Loddbøker</h2>
+            <div id="rangeSetup">
+                <input type="text" id="rangeName" placeholder="Navn (f.eks. Blå bok)">
+                <input type="number" id="rangeMax" placeholder="Maks Verdi (1-1000)" min="1" max="1000">
+                <button id="addRangeBtn">Legg til bok</button>
+            </div>
+            <div id="rangesDisplay">
+                <h3>Gjeldende loddbøker:</h3>
+                <ul id="rangesList">
+                    </ul>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="section">
+            <h2>2. Trekning</h2>
+            <div class="lottery-controls">
+                <button id="pickCombinationBtn">🎁 Trekk unik kombinasjon</button>
+                <button id="resetLotteryBtn">🔄 Resett trekningen</button>
+            </div>
+            <div id="pickedCombinationResult">
+                Siste trekning: <span id="pickedCombinationDisplay">-</span>
+            </div>
+            
+            <div id="drawnCombinationsListContainer">
+                <h3>Trekningshistorikk (siden forrige resett):</h3>
+                <ul id="drawnCombinationsList">
+                    </ul>
+                <p id="noDrawnItemsMsg">Ingen trekninger siden forrige resett</p>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="section">
+            <h2>📊 Statistikk</h2>
+            <div id="statsDisplay">
+                <p>Total antall mulige kombinasjoner: <span id="totalPossibleDisplay">0</span></p>
+                <p>Kombinasjoner trukket: <span id="pickedCountDisplay">0</span></p>
+                <p>Gjenstående kombinasjoner: <span id="remainingDisplay">0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const rangeNameInput = document.getElementById('rangeName');
+            const rangeMaxInput = document.getElementById('rangeMax');
+            const addRangeBtn = document.getElementById('addRangeBtn');
+            const rangesList = document.getElementById('rangesList');
+            
+            const pickCombinationBtn = document.getElementById('pickCombinationBtn');
+            const pickedCombinationDisplay = document.getElementById('pickedCombinationDisplay');
+            const resetLotteryBtn = document.getElementById('resetLotteryBtn');
+            
+            const drawnCombinationsList = document.getElementById('drawnCombinationsList');
+            const noDrawnItemsMsg = document.getElementById('noDrawnItemsMsg');
+
+            const totalPossibleDisplay = document.getElementById('totalPossibleDisplay');
+            const pickedCountDisplay = document.getElementById('pickedCountDisplay');
+            const remainingDisplay = document.getElementById('remainingDisplay');
+            const errorMessageDiv = document.getElementById('errorMessage');
+
+            let ranges = [];
+            let pickedCombinations = new Set();
+            let drawnOrder = []; // To store combinations in the order they were drawn
+
+            function displayError(message) {
+                errorMessageDiv.textContent = message;
+                if (message) {
+                    setTimeout(() => { errorMessageDiv.textContent = ''; }, 3000);
+                }
+            }
+
+            function updateRangesDisplay() {
+                rangesList.innerHTML = '';
+                ranges.forEach((range, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `Navn: ${range.name}, Maks verdi: ${range.max}`;
+                    
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Slett';
+                    deleteButton.onclick = () => deleteRange(index);
+                    
+                    listItem.appendChild(deleteButton);
+                    rangesList.appendChild(listItem);
+                });
+                updateStatsDisplay();
+                // No need to call updateDrawnCombinationsDisplay here directly, 
+                // as deleteRange will handle its impact on drawn items.
+            }
+            
+            function updateDrawnCombinationsDisplay() {
+                drawnCombinationsList.innerHTML = ''; // Clear existing list
+                if (drawnOrder.length === 0) {
+                    noDrawnItemsMsg.style.display = 'block';
+                    drawnCombinationsList.style.display = 'none';
+                } else {
+                    noDrawnItemsMsg.style.display = 'none';
+                    drawnCombinationsList.style.display = 'block';
+                    drawnOrder.forEach(item => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = item;
+                        drawnCombinationsList.appendChild(listItem);
+                    });
+                }
+            }
+
+            function deleteRange(index) {
+                if (ranges.length === 0 || index < 0 || index >= ranges.length) return;
+
+                const rangeNameToDelete = ranges[index].name;
+                if (confirm(`Are you sure you want to delete range "${rangeNameToDelete}"? \nPicked combinations from this range will be removed from the history and become available again if they were unique to this range name.`)) {
+                    ranges.splice(index, 1);
+                    
+                    // Re-evaluate pickedCombinations and drawnOrder
+                    const newPickedCombinations = new Set();
+                    const newDrawnOrder = [];
+
+                    pickedCombinations.forEach(item => {
+                        // A simple way to check: does the item start with the deleted range name?
+                        // This assumes range names don't "contain" other range names in a problematic way (e.g., "A" and "AB")
+                        // For robust parsing, one might use regex: item.match(/^([a-zA-Z0-9_]+?)(\d+)$/);
+                        // If item's range name is not the deleted one, keep it.
+                        if (!item.startsWith(rangeNameToDelete) || !isNaN(parseInt(item.substring(rangeNameToDelete.length)))) {
+                            // Check if the range for this item still exists
+                            const itemRangeName = item.replace(/[0-9]+$/, '');
+                            if (ranges.some(r => r.name === itemRangeName)) {
+                                newPickedCombinations.add(item);
+                            }
+                        }
+                    });
+                    pickedCombinations = newPickedCombinations;
+
+                    drawnOrder.forEach(item => {
+                        if (pickedCombinations.has(item)) { // Only keep items that are still validly "picked"
+                            newDrawnOrder.push(item);
+                        }
+                    });
+                    drawnOrder = newDrawnOrder;
+
+                    updateRangesDisplay(); // This calls updateStatsDisplay
+                    updateDrawnCombinationsDisplay();
+                    displayError(`Range "${rangeNameToDelete}" deleted.`);
+                }
+            }
+
+
+            function getTotalPossibleCombinations() {
+                return ranges.reduce((sum, range) => sum + range.max, 0);
+            }
+
+            function updateStatsDisplay() {
+                const totalPossible = getTotalPossibleCombinations();
+                const pickedCount = pickedCombinations.size; // or drawnOrder.length, should be same
+                
+                totalPossibleDisplay.textContent = totalPossible;
+                pickedCountDisplay.textContent = pickedCount;
+                remainingDisplay.textContent = totalPossible - pickedCount;
+
+                pickCombinationBtn.disabled = (ranges.length === 0 || pickedCount >= totalPossible);
+            }
+
+            addRangeBtn.addEventListener('click', () => {
+                const name = rangeNameInput.value.trim();
+                const maxStr = rangeMaxInput.value;
+
+                if (!name) {
+                    displayError("Range name cannot be empty.");
+                    return;
+                }
+                // Basic validation for range name (e.g., disallow names that are purely numeric)
+                if (/^\d+$/.test(name)) {
+                    displayError("Range name cannot be purely numeric (to avoid conflicts with numbers).");
+                    return;
+                }
+                if (ranges.some(range => range.name === name)) {
+                    displayError(`A range with name "${name}" already exists.`);
+                    return;
+                }
+                if (!maxStr) {
+                    displayError("Max value cannot be empty.");
+                    return;
+                }
+
+                const max = parseInt(maxStr);
+
+                if (isNaN(max) || max < 1 || max > 1000) {
+                    displayError("Max value must be a number between 1 and 1000.");
+                    return;
+                }
+
+                ranges.push({ name, max });
+                rangeNameInput.value = '';
+                rangeMaxInput.value = '';
+                updateRangesDisplay();
+                displayError(""); 
+            });
+
+            pickCombinationBtn.addEventListener('click', () => {
+                if (ranges.length === 0) {
+                    displayError("Please add at least one range.");
+                    return;
+                }
+
+                const totalPossible = getTotalPossibleCombinations();
+                if (pickedCombinations.size >= totalPossible) {
+                    displayError("All possible combinations have been picked! Please reset.");
+                    return;
+                }
+
+                let combination;
+                let selectedRange;
+                let randomNumber;
+
+                while (true) {
+                    const randomRangeIndex = Math.floor(Math.random() * ranges.length);
+                    selectedRange = ranges[randomRangeIndex];
+                    randomNumber = Math.floor(Math.random() * selectedRange.max) + 1;
+                    combination = selectedRange.name + randomNumber;
+
+                    if (!pickedCombinations.has(combination)) {
+                        pickedCombinations.add(combination);
+                        drawnOrder.push(combination); // Add to ordered list
+                        break;
+                    }
+                }
+                
+                pickedCombinationDisplay.textContent = combination;
+                updateStatsDisplay();
+                updateDrawnCombinationsDisplay(); // Update the list of drawn items
+                displayError(""); 
+            });
+
+            resetLotteryBtn.addEventListener('click', () => {
+                if (confirm("Are you sure you want to reset the lottery? All picked combinations will be cleared and the history will be emptied.")) {
+                    pickedCombinations.clear();
+                    drawnOrder = []; // Clear the ordered list
+                    pickedCombinationDisplay.textContent = '-';
+                    updateStatsDisplay();
+                    updateDrawnCombinationsDisplay(); // Update the (now empty) list
+                    displayError(""); 
+                    alert("Lottery has been reset!");
+                }
+            });
+
+            // Initial state update
+            updateRangesDisplay(); // This also calls updateStatsDisplay
+            updateDrawnCombinationsDisplay(); // Initialize drawn items list display
+        });
+    </script>
+</body>
+</html>
