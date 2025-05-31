@@ -267,7 +267,7 @@
                 if (ranges.length === 0 || index < 0 || index >= ranges.length) return;
 
                 const rangeNameToDelete = ranges[index].name;
-                if (confirm(`Are you sure you want to delete range "${rangeNameToDelete}"? \nPicked combinations from this range will be removed from the history and become available again if they were unique to this range name.`)) {
+                if (confirm(`Er du sikker på at du vil slette loddboken "${rangeNameToDelete}"? \nTrukne kombinasjoner fra denne loddboken vil blir fjernet fra historikken.`)) {
                     ranges.splice(index, 1);
                     
                     // Re-evaluate pickedCombinations and drawnOrder
@@ -298,7 +298,7 @@
 
                     updateRangesDisplay(); // This calls updateStatsDisplay
                     updateDrawnCombinationsDisplay();
-                    displayError(`Range "${rangeNameToDelete}" deleted.`);
+                    displayError(`Loddbok "${rangeNameToDelete}" slettet.`);
                 }
             }
 
@@ -323,27 +323,27 @@
                 const maxStr = rangeMaxInput.value;
 
                 if (!name) {
-                    displayError("Range name cannot be empty.");
+                    displayError("Navn kan ikke være tom.");
                     return;
                 }
                 // Basic validation for range name (e.g., disallow names that are purely numeric)
                 if (/^\d+$/.test(name)) {
-                    displayError("Range name cannot be purely numeric (to avoid conflicts with numbers).");
+                    displayError("Navn kan ikke bare være tall. (For å unngå konflikter ved trekking).");
                     return;
                 }
                 if (ranges.some(range => range.name === name)) {
-                    displayError(`A range with name "${name}" already exists.`);
+                    displayError(`En loddbok med navnet "${name}" finnes allerede.`);
                     return;
                 }
                 if (!maxStr) {
-                    displayError("Max value cannot be empty.");
+                    displayError("Maks verdi kan ikke være tom.");
                     return;
                 }
 
                 const max = parseInt(maxStr);
 
-                if (isNaN(max) || max < 1 || max > 1000) {
-                    displayError("Max value must be a number between 1 and 1000.");
+                if (isNaN(max) || max < 1 || max > 10000) {
+                    displayError("Maks verdi må være mellom 1 og 10000.");
                     return;
                 }
 
@@ -356,13 +356,13 @@
 
             pickCombinationBtn.addEventListener('click', () => {
                 if (ranges.length === 0) {
-                    displayError("Please add at least one range.");
+                    displayError("Legg til minst en loddbok");
                     return;
                 }
 
                 const totalPossible = getTotalPossibleCombinations();
                 if (pickedCombinations.size >= totalPossible) {
-                    displayError("All possible combinations have been picked! Please reset.");
+                    displayError("Alle mulige kombinasjoner er trukket. Vennligst resett for å starte på nytt.");
                     return;
                 }
 
@@ -390,14 +390,14 @@
             });
 
             resetLotteryBtn.addEventListener('click', () => {
-                if (confirm("Are you sure you want to reset the lottery? All picked combinations will be cleared and the history will be emptied.")) {
+                if (confirm("Er du sikker på at du vil resette trekningen? Alle trekte kombinasjoner vil bli fjernet og historikken blir borte.")) {
                     pickedCombinations.clear();
                     drawnOrder = []; // Clear the ordered list
                     pickedCombinationDisplay.textContent = '-';
                     updateStatsDisplay();
                     updateDrawnCombinationsDisplay(); // Update the (now empty) list
                     displayError(""); 
-                    alert("Lottery has been reset!");
+                    alert("Trekningen har blitt resatt!");
                 }
             });
 
