@@ -374,13 +374,21 @@
                 }
 
                 let combination;
-                let selectedRange;
-                let randomNumber;
 
+                // Treat all tickets across all books as a single flat index space
+                // so every ticket has equal probability, regardless of book size.
                 while (true) {
-                    const randomRangeIndex = Math.floor(Math.random() * ranges.length);
-                    selectedRange = ranges[randomRangeIndex];
-                    randomNumber = Math.floor(Math.random() * selectedRange.max) + 1;
+                    let r = Math.floor(Math.random() * totalPossible);
+                    let selectedRange;
+                    let randomNumber;
+                    for (const range of ranges) {
+                        if (r < range.max) {
+                            selectedRange = range;
+                            randomNumber = r + 1;
+                            break;
+                        }
+                        r -= range.max;
+                    }
                     combination = selectedRange.name + randomNumber;
 
                     if (!pickedCombinations.has(combination)) {
